@@ -1,8 +1,11 @@
 package com.demo.carrent.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Entity
 @Table(name="user")
@@ -27,4 +30,9 @@ public class User {
 
     @Column(name = "email")
     private String email;
+
+    //specifying the inverse side of relationship
+    @JsonIgnore
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Rent> rents;
 }

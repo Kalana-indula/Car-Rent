@@ -4,7 +4,6 @@ import com.demo.carrent.dto.VehicleDto;
 import com.demo.carrent.dto.response.UpdateResponse;
 import com.demo.carrent.entity.Vehicle;
 import com.demo.carrent.service.VehicleService;
-import com.fasterxml.jackson.databind.ser.impl.ReadOnlyClassToSerializerMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
