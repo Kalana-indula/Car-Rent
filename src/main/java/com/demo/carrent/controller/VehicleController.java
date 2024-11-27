@@ -49,6 +49,21 @@ public class VehicleController {
         }
     }
 
+    @GetMapping("/vehicleCategories/{id}/vehicles")
+    public ResponseEntity<?> findVehiclesByCategory(@PathVariable Long id){
+        try {
+            List<Vehicle> vehicles=vehicleService.getVehicleByCategory(id);
+
+            if(!vehicles.isEmpty()){
+                return ResponseEntity.status(HttpStatus.FOUND).body(vehicles);
+            }else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Vehicle Found For The Category");
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/vehicles")
     public ResponseEntity<?> findAllVehicles(){
         try {

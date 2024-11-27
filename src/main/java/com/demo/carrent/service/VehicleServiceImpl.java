@@ -51,6 +51,11 @@ public class VehicleServiceImpl implements VehicleService{
     }
 
     @Override
+    public List<Vehicle> getVehicleByCategory(Long id) {
+        return vehicleRepository.findVehicleByCategory(id);
+    }
+
+    @Override
     public List<Vehicle> getAllVehicles() {
         return vehicleRepository.findAll();
     }

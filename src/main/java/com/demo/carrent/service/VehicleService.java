@@ -16,6 +16,9 @@ public interface VehicleService {
     //Get a vehicle by id
     Vehicle getVehicleById(Long id);
 
+    //Get vehicles by category
+    List<Vehicle> getVehicleByCategory(Long id);
+
     //Get all existing vehicles
     List<Vehicle> getAllVehicles();
 
