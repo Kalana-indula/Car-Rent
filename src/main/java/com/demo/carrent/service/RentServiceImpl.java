@@ -1,6 +1,10 @@
 package com.demo.carrent.service;
 
 import com.demo.carrent.dto.RentDto;
+import com.demo.carrent.dto.RentUpdateDto;
+import com.demo.carrent.dto.response.CreateResponse;
+import com.demo.carrent.dto.response.DeleteResponse;
+import com.demo.carrent.dto.response.UpdateResponse;
 import com.demo.carrent.entity.Rent;
 import com.demo.carrent.entity.User;
 import com.demo.carrent.entity.Vehicle;
@@ -34,48 +38,174 @@ public class RentServiceImpl implements RentService{
 
     @Override
     @Transactional
-    public Rent createRent(RentDto rentDto) {
+    public CreateResponse<Rent> createRent(RentDto rentDto)throws IllegalArgumentException {
 
-        //check if the vehicle is available for the rent
-        Vehicle vehicle=vehicleRepository.findById(rentDto.getVehicleId()).orElse(null);
-
-        //get a user
-        User user=userRepository.findById(rentDto.getUserId()).orElse(null);
-
-        if(vehicle!=null && user!=null){
-            if(vehicle.getIsAvailable()){
-                Rent rent=new Rent();
-
-                //set booking time
-                rent.setBookingTime(LocalDateTime.now());
-
-                //setting starting day and end day
-                rent.setStartingDate(rentDto.getStartingDate());
-                rent.setEndDate(rentDto.getEndDate());
-
-                //set total days
-                if(rent.getStartingDate()!=null && rent.getEndDate()!=null){
-                    rent.setTotalDays((int) ChronoUnit.DAYS.between(rentDto.getStartingDate(),rentDto.getEndDate()));
+        try{
+            //check if the entered timestamps are valid
+            if(rentDto.getStartingDate()!=null && rentDto.getEndDate()!=null){
+                if(!rentDto.getStartingDate().isBefore(rentDto.getEndDate())){
+                    throw new IllegalArgumentException("Starting date must be before the ending date");
                 }
-
-                //set price
-                rent.setPrice(rent.getTotalDays()*vehicle.getRentPerDay());
-                rent.setRentStatus(rentDto.getRentStatus());
-                rent.setPaymentStatus(rentDto.getPaymentStatus());
-                rent.setUser(user);
-                rent.setVehicle(vehicle);
-
-                return rentRepository.save(rent);
-            }else{
-                return null;
+            }else {
+                throw new IllegalArgumentException("Starting or Ending dates should not be null");
             }
-        }else{
-            return null;
+
+            //create a response object
+            CreateResponse<Rent> response=new CreateResponse<>();
+
+            //get vehicle and user for corresponding ids
+            Vehicle vehicle=vehicleRepository.findById(rentDto.getVehicleId()).orElse(null);
+            User user=userRepository.findById(rentDto.getUserId()).orElse(null);
+
+            if(user!=null){
+                if(vehicle!=null){
+                    //check if the vehicle is available for rent
+                    if(vehicle.getIsAvailable()){
+                        Rent rent=new Rent();
+
+                        //Deriving duration by getting date difference
+                        rent.setTotalDays((int)ChronoUnit.DAYS.between(rentDto.getStartingDate(),rentDto.getEndDate()));
+                        rent.setPrice(rent.getTotalDays()*vehicle.getRentPerDay());
+                        rent.setBookingTime(LocalDateTime.now());
+                        rent.setStartingDate(rentDto.getStartingDate());
+                        rent.setEndDate(rentDto.getEndDate());
+                        rent.setRentStatus(rentDto.getRentStatus());
+                        rent.setPaymentStatus(rentDto.getPaymentStatus());
+                        rent.setUser(user);
+                        rent.setVehicle(vehicle);
+
+                        //set vehicle availability to false
+                        updateAvailability(vehicle,false);
+
+                        rentRepository.save(rent);
+
+                        response.setStatusMessage("Rent was created successfully");
+                        response.setCreatedData(rent);
+
+                        return response;
+                    }
+                    else{
+                        response.setStatusMessage("Vehicle is not available for rent");
+                        return response;
+                    }
+                }else {
+                    response.setStatusMessage("Invalid vehicle Id");
+                    return response;
+                }
+            }else {
+                response.setStatusMessage("Invalid user Id");
+
+                return response;
+            }
+
+        }catch (IllegalArgumentException e){
+            throw e;
         }
+
     }
 
     @Override
     public List<Rent> getAllRents() {
-        return List.of();
+        return rentRepository.findAll();
+    }
+
+    @Override
+    public Rent getRentById(Long id) {
+
+        return rentRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    @Transactional
+    public UpdateResponse<Rent> updateRent(Long id, RentUpdateDto rentUpdateDto)throws IllegalArgumentException {
+
+        //create an instance of update response for rent update
+        UpdateResponse<Rent> rentUpdateResponse=new UpdateResponse<>();
+
+        //find existing rent object
+        Rent existingRent=rentRepository.findById(id).orElse(null);
+
+        //find new vehicle for update rent
+        Vehicle vehicle=vehicleRepository.findById(rentUpdateDto.getVehicleId()).orElse(null);
+
+        //check if a rent is existed for given id
+        if(existingRent!=null){
+           try {
+               if(rentUpdateDto.getStartingDate()!=null && rentUpdateDto.getEndDate()!=null){
+                   if(!rentUpdateDto.getStartingDate().isBefore(rentUpdateDto.getEndDate())){
+                       throw new IllegalArgumentException("Starting date must be before the ending date");
+                   }
+               }else {
+                   throw new IllegalArgumentException("Starting or Ending dates should not be null");
+               }
+
+               if(vehicle!=null){
+
+                   existingRent.setTotalDays((int)ChronoUnit.DAYS.between(rentUpdateDto.getStartingDate(),rentUpdateDto.getEndDate()));
+                   existingRent.setPrice(existingRent.getTotalDays()*vehicle.getRentPerDay());
+                   existingRent.setStartingDate(rentUpdateDto.getStartingDate());
+                   existingRent.setEndDate(rentUpdateDto.getEndDate());
+                   existingRent.setRentStatus(rentUpdateDto.getRentStatus());
+                   existingRent.setPaymentStatus(rentUpdateDto.getPaymentStatus());
+                   existingRent.setVehicle(vehicle);
+
+                   Rent updatedRent= rentRepository.save(existingRent);
+
+                   if(vehicle!=existingRent.getVehicle()){
+                       //update availability of vehicle in updated rent
+                       updateAvailability(vehicle,false);
+
+                       //update availability of
+                       updateAvailability(existingRent.getVehicle(),true);
+                   }
+
+                   rentUpdateResponse.setResponseMessage("Rent updated successfully");
+                   rentUpdateResponse.setUpdatedData(updatedRent);
+
+               }else{
+                   rentUpdateResponse.setResponseMessage("Invalid vehicle id");
+               }
+           }catch (IllegalArgumentException e){
+               throw e;
+           }
+
+           return rentUpdateResponse;
+        }else{
+            rentUpdateResponse.setResponseMessage("No rent available");
+
+            return rentUpdateResponse;
+        }
+    }
+
+    @Override
+    public DeleteResponse deleteRent(Long id) {
+
+        //find if the rent exist
+        boolean isExist=rentRepository.existsById(id);
+
+        //create instance of delete response
+        DeleteResponse deleteResponse=new DeleteResponse();
+
+        if(isExist){
+            rentRepository.deleteById(id);
+
+            deleteResponse.setStatusMessage("Rent deleted successfully");
+            deleteResponse.setIsDeleted(true);
+
+            return deleteResponse;
+        }else {
+            deleteResponse.setStatusMessage("No rent found");
+
+            return deleteResponse;
+        }
+
+    }
+
+
+    //update vehicle availability
+    private void updateAvailability(Vehicle vehicle,Boolean isAvailable){
+        vehicle.setIsAvailable(isAvailable);
+
+        vehicleRepository.save(vehicle);
     }
 }
