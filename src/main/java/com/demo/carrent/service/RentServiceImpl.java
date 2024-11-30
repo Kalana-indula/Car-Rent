@@ -125,8 +125,11 @@ public class RentServiceImpl implements RentService{
         //find existing rent object
         Rent existingRent=rentRepository.findById(id).orElse(null);
 
+        //find current vehicle
+        Vehicle currentVehicle=existingRent.getVehicle();
+
         //find new vehicle for update rent
-        Vehicle vehicle=vehicleRepository.findById(rentUpdateDto.getVehicleId()).orElse(null);
+        Vehicle newVehicle=vehicleRepository.findById(rentUpdateDto.getVehicleId()).orElse(null);
 
         //check if a rent is existed for given id
         if(existingRent!=null){
@@ -139,24 +142,24 @@ public class RentServiceImpl implements RentService{
                    throw new IllegalArgumentException("Starting or Ending dates should not be null");
                }
 
-               if(vehicle!=null){
+               if(newVehicle!=null){
 
                    existingRent.setTotalDays((int)ChronoUnit.DAYS.between(rentUpdateDto.getStartingDate(),rentUpdateDto.getEndDate()));
-                   existingRent.setPrice(existingRent.getTotalDays()*vehicle.getRentPerDay());
+                   existingRent.setPrice(existingRent.getTotalDays()*newVehicle.getRentPerDay());
                    existingRent.setStartingDate(rentUpdateDto.getStartingDate());
                    existingRent.setEndDate(rentUpdateDto.getEndDate());
                    existingRent.setRentStatus(rentUpdateDto.getRentStatus());
                    existingRent.setPaymentStatus(rentUpdateDto.getPaymentStatus());
-                   existingRent.setVehicle(vehicle);
+                   existingRent.setVehicle(newVehicle);
 
                    Rent updatedRent= rentRepository.save(existingRent);
 
-                   if(vehicle!=existingRent.getVehicle()){
+                   if(newVehicle!=currentVehicle){
                        //update availability of vehicle in updated rent
-                       updateAvailability(vehicle,false);
+                       updateAvailability(newVehicle,false);
 
                        //update availability of
-                       updateAvailability(existingRent.getVehicle(),true);
+                       updateAvailability(currentVehicle,true);
                    }
 
                    rentUpdateResponse.setResponseMessage("Rent updated successfully");
