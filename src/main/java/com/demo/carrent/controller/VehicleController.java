@@ -14,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api")
+@CrossOrigin("*")
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -70,7 +71,7 @@ public class VehicleController {
             List<Vehicle> vehicles=vehicleService.getAllVehicles();
 
             if(!vehicles.isEmpty()){
-                return ResponseEntity.status(HttpStatus.FOUND).body(vehicles);
+                return ResponseEntity.status(HttpStatus.OK).body(vehicles);
             }else{
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Vehicles Found");
             }
