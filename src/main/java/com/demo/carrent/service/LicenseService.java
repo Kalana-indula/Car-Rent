@@ -16,7 +16,7 @@ public interface LicenseService {
     License addLicenseDetails(MultipartFile file, LicenseDto licenseDto) throws IOException;
 
     //find license by id
-    License getLicenseById(Long id);
+    License getLicenseByUser(String userIdNo);
 
     //get all license details
     List<License> getAllLicenseDetails();

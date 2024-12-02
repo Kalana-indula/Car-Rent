@@ -9,6 +9,7 @@ import java.time.LocalDate;
 @Entity
 @Setter
 @Getter
+@Table(name = "license")
 public class License {
 
     @Id

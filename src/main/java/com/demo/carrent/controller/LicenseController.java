@@ -55,5 +55,20 @@ public class LicenseController {
         }
     }
 
+    @GetMapping("/users/{userIdNumber}/license")
+    public ResponseEntity<?> findLicenseByUser(@PathVariable String userIdNumber){
+        try {
+            License license=licenseService.getLicenseByUser(userIdNumber);
+
+            if(license!=null){
+                return ResponseEntity.status(HttpStatus.OK).body(license);
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No User Found");
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
 
 }

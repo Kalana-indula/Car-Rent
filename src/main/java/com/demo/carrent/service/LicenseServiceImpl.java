@@ -25,6 +25,7 @@ public class LicenseServiceImpl implements LicenseService{
 
     private final UserRepository userRepository;
 
+
     @Value("${file.upload-dir}")
     private String uploadDir;
 
@@ -60,10 +61,19 @@ public class LicenseServiceImpl implements LicenseService{
     }
 
     @Override
-    public License getLicenseById(Long id) {
+    public License getLicenseByUser(String userIdNo) {
 
-        return licenseRepository.findById(id).orElse(null);
+        //find user by Id number
+        User user=userRepository.findUserByIdNo(userIdNo);
+
+        if(user!=null){
+           return licenseRepository.findLicenseByUser(user.getId());
+
+        }else {
+            return null;
+        }
     }
+
 
     @Override
     public List<License> getAllLicenseDetails() {
