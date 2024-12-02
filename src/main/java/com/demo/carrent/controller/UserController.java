@@ -47,6 +47,22 @@ public class UserController {
         }
     }
 
+    //api for find user by id number
+    @GetMapping("/users/idNumber/{idNo}")
+    public ResponseEntity<?> findUserByIdNumber(@PathVariable String idNo){
+        try {
+            User user=userService.getUserByIdNumber(idNo);
+
+            if(user!=null){
+                return ResponseEntity.status(HttpStatus.OK).body(user);
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
     @GetMapping("/users")
     public ResponseEntity<?> findAllUsers(){
         try{

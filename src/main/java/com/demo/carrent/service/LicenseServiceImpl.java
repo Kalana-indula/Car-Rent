@@ -61,12 +61,14 @@ public class LicenseServiceImpl implements LicenseService{
 
     @Override
     public License getLicenseById(Long id) {
-        return null;
+
+        return licenseRepository.findById(id).orElse(null);
     }
 
     @Override
     public List<License> getAllLicenseDetails() {
-        return List.of();
+
+        return licenseRepository.findAll();
     }
 
     @Override

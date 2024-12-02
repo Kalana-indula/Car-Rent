@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -23,6 +24,7 @@ public class LicenseController {
         this.licenseService=licenseService;
     }
 
+    //'@ModelAttribute' is used when form-data is posted through api
     @PostMapping("/license")
     public ResponseEntity<?> addLicense(@RequestParam("file") MultipartFile file,@ModelAttribute LicenseDto licenseDto){
         try{
@@ -37,4 +39,21 @@ public class LicenseController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
+
+    @GetMapping("/license")
+    public ResponseEntity<?> findAllLicense(){
+        try {
+            List<License> licensesList=licenseService.getAllLicenseDetails();
+
+            if(!licensesList.isEmpty()){
+                return ResponseEntity.status(HttpStatus.OK).body(licensesList);
+            }else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No license found");
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
+
 }

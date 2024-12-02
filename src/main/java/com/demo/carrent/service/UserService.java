@@ -14,6 +14,9 @@ public interface UserService {
     //find user by id
     User getUserById(Long id);
 
+    //find user by id number
+    User getUserByIdNumber(String idNo);
+
     //find all existing users
     List<User> getAllUsers();
 
