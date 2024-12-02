@@ -82,8 +82,14 @@ public class LicenseServiceImpl implements LicenseService{
             dir.mkdir();
         }
 
+        //get original file name extension
+        String originalFileName=file.getOriginalFilename();
+
+        //extracting filename extension from original filename
+        String filNameExtension=originalFileName !=null && originalFileName.contains(".") ? originalFileName.substring(originalFileName.lastIndexOf(".")) :" ";
+
         //define file name
-        String fileName="user_"+licenseNumber;
+        String fileName="user_"+licenseNumber+filNameExtension;
         Path path= Paths.get(uploadDir,fileName);
 
         //save the file to the specified directory
