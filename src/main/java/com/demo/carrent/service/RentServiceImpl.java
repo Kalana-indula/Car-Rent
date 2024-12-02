@@ -1,5 +1,7 @@
 package com.demo.carrent.service;
 
+import com.demo.carrent.common.PaymentStatus;
+import com.demo.carrent.common.RentStatus;
 import com.demo.carrent.dto.RentDto;
 import com.demo.carrent.dto.RentUpdateDto;
 import com.demo.carrent.dto.response.CreateResponse;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -64,13 +67,21 @@ public class RentServiceImpl implements RentService{
                         Rent rent=new Rent();
 
                         //Deriving duration by getting date difference
-                        rent.setTotalDays((int)ChronoUnit.DAYS.between(rentDto.getStartingDate(),rentDto.getEndDate()));
+                        int duration=(int)ChronoUnit.DAYS.between(rentDto.getStartingDate(),rentDto.getEndDate());
+
+                        if(duration>30){
+                            response.setStatusMessage("Duration is exceeding maximum renting period");
+
+                            return response;
+                        }
+
+                        rent.setTotalDays(duration);
                         rent.setPrice(rent.getTotalDays()*vehicle.getRentPerDay());
                         rent.setBookingTime(LocalDateTime.now());
                         rent.setStartingDate(rentDto.getStartingDate());
                         rent.setEndDate(rentDto.getEndDate());
-                        rent.setRentStatus(rentDto.getRentStatus());
-                        rent.setPaymentStatus(rentDto.getPaymentStatus());
+                        rent.setRentStatus(RentStatus.PENDING);
+                        rent.setPaymentStatus(PaymentStatus.PENDING);
                         rent.setUser(user);
                         rent.setVehicle(vehicle);
 
@@ -148,8 +159,8 @@ public class RentServiceImpl implements RentService{
                    existingRent.setPrice(existingRent.getTotalDays()*newVehicle.getRentPerDay());
                    existingRent.setStartingDate(rentUpdateDto.getStartingDate());
                    existingRent.setEndDate(rentUpdateDto.getEndDate());
-                   existingRent.setRentStatus(rentUpdateDto.getRentStatus());
-                   existingRent.setPaymentStatus(rentUpdateDto.getPaymentStatus());
+                   existingRent.setRentStatus(RentStatus.PENDING);
+                   existingRent.setPaymentStatus(PaymentStatus.PENDING);
                    existingRent.setVehicle(newVehicle);
 
                    Rent updatedRent= rentRepository.save(existingRent);

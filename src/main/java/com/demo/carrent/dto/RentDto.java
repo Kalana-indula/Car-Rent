@@ -14,8 +14,6 @@ public class RentDto {
 
     private LocalDate startingDate;
     private LocalDate endDate;
-    private RentStatus rentStatus;
-    private PaymentStatus paymentStatus;
     private Long userId;
     private Long vehicleId;
 }

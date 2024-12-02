@@ -12,7 +12,5 @@ import java.time.LocalDate;
 public class RentUpdateDto {
     private LocalDate startingDate;
     private LocalDate endDate;
-    private RentStatus rentStatus;
-    private PaymentStatus paymentStatus;
     private Long vehicleId;
 }
