@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @Getter
 public class PaymentDto {
 
-    private BigDecimal amount;
+//    private BigDecimal amount;
     private Long rentId;
-    private Long userId;
+//    private Long userId;
 }

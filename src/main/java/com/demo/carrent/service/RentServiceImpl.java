@@ -3,6 +3,7 @@ package com.demo.carrent.service;
 import com.demo.carrent.common.PaymentStatus;
 import com.demo.carrent.common.RentStatus;
 import com.demo.carrent.dto.RentDto;
+import com.demo.carrent.dto.RentStatusDto;
 import com.demo.carrent.dto.RentUpdateDto;
 import com.demo.carrent.dto.response.CreateResponse;
 import com.demo.carrent.dto.response.DeleteResponse;
@@ -16,6 +17,8 @@ import com.demo.carrent.repository.VehicleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -74,7 +77,7 @@ public class RentServiceImpl implements RentService{
                         }
 
                         rent.setTotalDays(duration);
-                        rent.setPrice(rent.getTotalDays()*vehicle.getRentPerDay());
+                        rent.setPrice(BigDecimal.valueOf(rent.getTotalDays()*vehicle.getRentPerDay()));
                         rent.setBookingTime(LocalDateTime.now());
                         rent.setStartingDate(rentDto.getStartingDate());
                         rent.setEndDate(rentDto.getEndDate());
@@ -154,7 +157,7 @@ public class RentServiceImpl implements RentService{
                if(newVehicle!=null){
 
                    existingRent.setTotalDays((int)ChronoUnit.DAYS.between(rentUpdateDto.getStartingDate(),rentUpdateDto.getEndDate()));
-                   existingRent.setPrice(existingRent.getTotalDays()*newVehicle.getRentPerDay());
+                   existingRent.setPrice(BigDecimal.valueOf(existingRent.getTotalDays()*newVehicle.getRentPerDay()));
                    existingRent.setStartingDate(rentUpdateDto.getStartingDate());
                    existingRent.setEndDate(rentUpdateDto.getEndDate());
                    existingRent.setRentStatus(RentStatus.PENDING);
@@ -186,6 +189,29 @@ public class RentServiceImpl implements RentService{
             rentUpdateResponse.setResponseMessage("No rent available");
 
             return rentUpdateResponse;
+        }
+    }
+
+    @Override
+    public UpdateResponse<Rent> updateRentStatus(Long id, RentStatusDto rentStatusDto) {
+
+        //find rent
+        Rent existingRent=rentRepository.findById(id).orElse(null);
+
+        UpdateResponse<Rent> updateResponse=new UpdateResponse<>();
+
+        if(existingRent!=null){
+            existingRent.setRentStatus(RentStatus.valueOf(rentStatusDto.getRentStatus().toUpperCase()));
+            rentRepository.save(existingRent);
+
+            updateResponse.setResponseMessage("Rent was "+rentStatusDto.getRentStatus().toUpperCase());
+            updateResponse.setUpdatedData(existingRent);
+
+            return updateResponse;
+        }else{
+            updateResponse.setResponseMessage("No valid rent found");
+
+            return updateResponse;
         }
     }
 

@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -24,7 +25,7 @@ public class Rent {
     private Integer totalDays;
 
     @Column(name = "price")
-    private Double price;
+    private BigDecimal price;
 
     @Column(name = "booking_time")
     private LocalDateTime bookingTime;

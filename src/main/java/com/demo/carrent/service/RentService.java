@@ -1,6 +1,7 @@
 package com.demo.carrent.service;
 
 import com.demo.carrent.dto.RentDto;
+import com.demo.carrent.dto.RentStatusDto;
 import com.demo.carrent.dto.RentUpdateDto;
 import com.demo.carrent.dto.response.CreateResponse;
 import com.demo.carrent.dto.response.DeleteResponse;
@@ -24,6 +25,9 @@ public interface RentService {
 
     //update rent
     UpdateResponse<Rent> updateRent(Long id, RentUpdateDto rentUpdateDto);
+
+    //update rent status
+    UpdateResponse<Rent> updateRentStatus(Long id, RentStatusDto rentStatusDto);
 
     //delete rent
     DeleteResponse deleteRent(Long id);

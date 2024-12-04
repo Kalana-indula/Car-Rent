@@ -1,5 +1,7 @@
 package com.demo.carrent.service;
 
+import com.demo.carrent.common.PaymentStatus;
+import com.demo.carrent.common.RentStatus;
 import com.demo.carrent.dto.PaymentDto;
 import com.demo.carrent.dto.response.CreateResponse;
 import com.demo.carrent.dto.response.DeleteResponse;
@@ -12,8 +14,9 @@ import com.demo.carrent.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
 public class PaymentServiceImpl implements PaymentService{
@@ -35,25 +38,41 @@ public class PaymentServiceImpl implements PaymentService{
     public CreateResponse<Payment> createPayment(PaymentDto paymentDto) {
 
         //find user and rent
-        User user=userRepository.findById(paymentDto.getUserId()).orElse(null);
-
         Rent rent=rentRepository.findById(paymentDto.getRentId()).orElse(null);
 
         CreateResponse<Payment> paymentCreateResponse=new CreateResponse<>();
 
         if(rent!=null){
-            if(user!=null){
+            //check if the rent is approved
+            if(rent.getRentStatus()==RentStatus.APPROVED){
+                //create new payment
                 Payment payment=new Payment();
 
-                payment.setAmount(paymentDto.getAmount());
+                payment.setAmount(rent.getPrice());
                 payment.setRent(rent);
-            }
-        }else{
+                payment.setUser(rent.getUser());
 
+                paymentRepository.save(payment);
+
+                //set payment status in rent to 'PAID'
+                rent.setPaymentStatus(PaymentStatus.PAID);
+                rentRepository.save(rent);
+
+                paymentCreateResponse.setStatusMessage("Payment create successfully");
+                paymentCreateResponse.setCreatedData(payment);
+
+                return paymentCreateResponse;
+            }else{
+                paymentCreateResponse.setStatusMessage("Rent is not approved");
+                return paymentCreateResponse;
+            }
+
+        }else{
+            paymentCreateResponse.setStatusMessage("No valid rent found");
+
+            return paymentCreateResponse;
         }
 
-
-        return null;
     }
 
     @Override
