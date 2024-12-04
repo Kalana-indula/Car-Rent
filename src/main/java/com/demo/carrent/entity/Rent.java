@@ -2,6 +2,7 @@ package com.demo.carrent.entity;
 
 import com.demo.carrent.common.PaymentStatus;
 import com.demo.carrent.common.RentStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,4 +51,8 @@ public class Rent {
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
+
+    @JsonIgnore
+    @OneToOne(mappedBy ="rent",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private Payment payment;
 }

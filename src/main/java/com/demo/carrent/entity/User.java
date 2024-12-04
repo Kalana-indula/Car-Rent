@@ -39,4 +39,8 @@ public class User {
     @JsonIgnore
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private License license;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL,fetch = FetchType.LAZY)
+    private List<Payment> payment;
 }
