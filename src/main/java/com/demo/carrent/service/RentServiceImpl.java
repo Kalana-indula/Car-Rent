@@ -156,7 +156,9 @@ public class RentServiceImpl implements RentService{
 
                if(newVehicle!=null){
 
-                   existingRent.setTotalDays((int)ChronoUnit.DAYS.between(rentUpdateDto.getStartingDate(),rentUpdateDto.getEndDate()));
+                   int updatedDuration= (int) ChronoUnit.DAYS.between(rentUpdateDto.getStartingDate(),rentUpdateDto.getEndDate());
+
+                   existingRent.setTotalDays(updatedDuration);
                    existingRent.setPrice(BigDecimal.valueOf(existingRent.getTotalDays()*newVehicle.getRentPerDay()));
                    existingRent.setStartingDate(rentUpdateDto.getStartingDate());
                    existingRent.setEndDate(rentUpdateDto.getEndDate());

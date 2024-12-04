@@ -5,6 +5,7 @@ import com.demo.carrent.common.RentStatus;
 import com.demo.carrent.dto.PaymentDto;
 import com.demo.carrent.dto.response.CreateResponse;
 import com.demo.carrent.dto.response.DeleteResponse;
+import com.demo.carrent.dto.response.UpdateResponse;
 import com.demo.carrent.entity.Payment;
 import com.demo.carrent.entity.Rent;
 import com.demo.carrent.entity.User;
@@ -77,12 +78,55 @@ public class PaymentServiceImpl implements PaymentService{
 
     @Override
     public List<Payment> getAllPayments() {
-        return List.of();
+        return paymentRepository.findAll();
     }
 
     @Override
-    public Payment updatePayment(PaymentDto paymentDto) {
-        return null;
+    public UpdateResponse<Payment> updatePayment(Long id,PaymentDto paymentDto) {
+
+        UpdateResponse<Payment> paymentUpdateResponse=new UpdateResponse<>();
+        //find current payment
+        Payment currentPayment=paymentRepository.findById(id).orElse(null);
+
+        //find current rent
+        Rent existingRent=rentRepository.findById(paymentDto.getRentId()).orElse(null);
+
+        if(existingRent!=null){
+            //check if rent status is 'APPROVED'
+            if(existingRent.getRentStatus()==RentStatus.APPROVED){
+
+                //find current rent amount
+                BigDecimal newAmount=existingRent.getPrice();
+
+                //find paid rent amount
+                BigDecimal paidAmount=currentPayment.getAmount();
+
+                //find outstanding
+                BigDecimal outstandingAmount=newAmount.subtract(paidAmount);
+
+                currentPayment.setAmount(outstandingAmount);
+                currentPayment.setRent(existingRent);
+                currentPayment.setUser(existingRent.getUser());
+
+                paymentRepository.save(currentPayment);
+
+                existingRent.setPaymentStatus(PaymentStatus.PAID);
+
+                paymentUpdateResponse.setResponseMessage("Payment updated");
+                paymentUpdateResponse.setUpdatedData(currentPayment);
+
+                return paymentUpdateResponse;
+            }else{
+                paymentUpdateResponse.setResponseMessage("Rent was not approved");
+
+                return paymentUpdateResponse;
+            }
+        }else{
+            paymentUpdateResponse.setResponseMessage("Invalid rent id");
+
+            return paymentUpdateResponse;
+        }
+
     }
 
     @Override
