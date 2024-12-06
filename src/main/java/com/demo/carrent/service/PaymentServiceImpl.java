@@ -82,14 +82,12 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
-    public UpdateResponse<Payment> updatePayment(Long id,PaymentDto paymentDto) {
+    public UpdateResponse<Payment> updatePayment(Long rentId) {
 
         UpdateResponse<Payment> paymentUpdateResponse=new UpdateResponse<>();
-        //find current payment
-        Payment currentPayment=paymentRepository.findById(id).orElse(null);
 
         //find current rent
-        Rent existingRent=rentRepository.findById(paymentDto.getRentId()).orElse(null);
+        Rent existingRent=rentRepository.findById(rentId).orElse(null);
 
         if(existingRent!=null){
             //check if rent status is 'APPROVED'
@@ -98,24 +96,44 @@ public class PaymentServiceImpl implements PaymentService{
                 //find current rent amount
                 BigDecimal newAmount=existingRent.getPrice();
 
-                //find paid rent amount
-                BigDecimal paidAmount=currentPayment.getAmount();
+                //find current paid amount
+                Payment currentPayment=existingRent.getPayment();
 
-                //find outstanding
-                BigDecimal outstandingAmount=newAmount.subtract(paidAmount);
+                if(currentPayment!=null){
+                    //find paid rent amount
+                    BigDecimal paidAmount=currentPayment.getAmount();
 
-                currentPayment.setAmount(outstandingAmount);
-                currentPayment.setRent(existingRent);
-                currentPayment.setUser(existingRent.getUser());
+                    //find outstanding
+                    BigDecimal outstandingAmount=newAmount.subtract(paidAmount);
 
-                paymentRepository.save(currentPayment);
+                    currentPayment.setAmount(outstandingAmount);
+                    currentPayment.setRent(existingRent);
+                    currentPayment.setUser(existingRent.getUser());
 
+                    paymentRepository.save(currentPayment);
+
+                    paymentUpdateResponse.setUpdatedData(currentPayment);
+                }else{
+
+                    Payment newPayment=new Payment();
+
+                    newPayment.setAmount(newAmount);
+                    newPayment.setRent(existingRent);
+                    newPayment.setUser(existingRent.getUser());
+
+                    paymentRepository.save(newPayment);
+
+                    paymentUpdateResponse.setUpdatedData(newPayment);
+                }
+
+                //update rent
                 existingRent.setPaymentStatus(PaymentStatus.PAID);
+                rentRepository.save(existingRent);
 
-                paymentUpdateResponse.setResponseMessage("Payment updated");
-                paymentUpdateResponse.setUpdatedData(currentPayment);
+                paymentUpdateResponse.setResponseMessage("Payment updated successfully");
 
                 return paymentUpdateResponse;
+
             }else{
                 paymentUpdateResponse.setResponseMessage("Rent was not approved");
 

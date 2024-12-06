@@ -63,11 +63,12 @@ public class PaymentController {
     }
 
     @PutMapping("/payments/{id}")
-    public ResponseEntity<?> updatePayment(@PathVariable Long id,@RequestBody PaymentDto paymentDto){
+    public ResponseEntity<?> updatePayment(@PathVariable Long id){
         try {
-            UpdateResponse<Payment> paymentUpdateResponse= paymentService.updatePayment(id,paymentDto);
+            UpdateResponse<Payment> paymentUpdateResponse= paymentService.updatePayment(id);
 
             if(paymentUpdateResponse.getUpdatedData()!=null){
+                System.out.println(paymentUpdateResponse.getResponseMessage());
                 return ResponseEntity.status(HttpStatus.OK).body(paymentUpdateResponse.getUpdatedData());
             }else{
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(paymentUpdateResponse.getResponseMessage());

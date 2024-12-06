@@ -19,7 +19,7 @@ public interface PaymentService {
     List<Payment> getAllPayments();
 
     //update payment
-    UpdateResponse<Payment> updatePayment(Long id,PaymentDto paymentDto);
+    UpdateResponse<Payment> updatePayment(Long rentId);
 
     //delete payment
     DeleteResponse deletePayment(Long id);
