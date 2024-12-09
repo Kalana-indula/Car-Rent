@@ -48,7 +48,7 @@ public class LicenseServiceImpl implements LicenseService{
             license.setExpirationDate(licenseDto.getExpirationDate());
 
             //set image and image location
-            license.setImagePath(uploadFile(file, licenseDto.getLicenseNumber()));
+            license.setImagePath(uploadFile(file, user.getIdNo()));
             license.setUser(user);
 
             licenseRepository.save(license);
@@ -87,7 +87,7 @@ public class LicenseServiceImpl implements LicenseService{
     }
 
     //uploading file
-    public String uploadFile(MultipartFile file,String licenseNumber)throws IOException {
+    public String uploadFile(MultipartFile file,String userIdNumber)throws IOException {
         //Ensure the directory exists
         File dir=new File(uploadDir);
         if(!dir.exists()){
@@ -101,7 +101,7 @@ public class LicenseServiceImpl implements LicenseService{
         String filNameExtension=originalFileName !=null && originalFileName.contains(".") ? originalFileName.substring(originalFileName.lastIndexOf(".")) :" ";
 
         //define file name
-        String fileName="user_"+licenseNumber+filNameExtension;
+        String fileName="user_"+userIdNumber+filNameExtension;
         Path path= Paths.get(uploadDir,fileName);
 
         //save the file to the specified directory

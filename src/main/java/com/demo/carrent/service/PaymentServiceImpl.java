@@ -4,11 +4,9 @@ import com.demo.carrent.common.PaymentStatus;
 import com.demo.carrent.common.RentStatus;
 import com.demo.carrent.dto.PaymentDto;
 import com.demo.carrent.dto.response.CreateResponse;
-import com.demo.carrent.dto.response.DeleteResponse;
 import com.demo.carrent.dto.response.UpdateResponse;
 import com.demo.carrent.entity.Payment;
 import com.demo.carrent.entity.Rent;
-import com.demo.carrent.entity.User;
 import com.demo.carrent.repository.PaymentRepository;
 import com.demo.carrent.repository.RentRepository;
 import com.demo.carrent.repository.UserRepository;
@@ -84,27 +82,27 @@ public class PaymentServiceImpl implements PaymentService{
     @Override
     public UpdateResponse<Payment> updatePayment(Long rentId) {
 
-        UpdateResponse<Payment> paymentUpdateResponse=new UpdateResponse<>();
+        UpdateResponse<Payment> paymentUpdateResponse = new UpdateResponse<>();
 
         //find current rent
-        Rent existingRent=rentRepository.findById(rentId).orElse(null);
+        Rent existingRent = rentRepository.findById(rentId).orElse(null);
 
-        if(existingRent!=null){
+        if (existingRent != null) {
             //check if rent status is 'APPROVED'
-            if(existingRent.getRentStatus()==RentStatus.APPROVED){
+            if (existingRent.getRentStatus() == RentStatus.APPROVED) {
 
                 //find current rent amount
-                BigDecimal newAmount=existingRent.getPrice();
+                BigDecimal newAmount = existingRent.getPrice();
 
                 //find current paid amount
-                Payment currentPayment=existingRent.getPayment();
+                Payment currentPayment = existingRent.getPayment();
 
-                if(currentPayment!=null){
+                if (currentPayment != null) {
                     //find paid rent amount
-                    BigDecimal paidAmount=currentPayment.getAmount();
+                    BigDecimal paidAmount = currentPayment.getAmount();
 
                     //find outstanding
-                    BigDecimal outstandingAmount=newAmount.subtract(paidAmount);
+                    BigDecimal outstandingAmount = newAmount.subtract(paidAmount);
 
                     currentPayment.setAmount(outstandingAmount);
                     currentPayment.setRent(existingRent);
@@ -113,9 +111,9 @@ public class PaymentServiceImpl implements PaymentService{
                     paymentRepository.save(currentPayment);
 
                     paymentUpdateResponse.setUpdatedData(currentPayment);
-                }else{
+                } else {
 
-                    Payment newPayment=new Payment();
+                    Payment newPayment = new Payment();
 
                     newPayment.setAmount(newAmount);
                     newPayment.setRent(existingRent);
@@ -134,21 +132,15 @@ public class PaymentServiceImpl implements PaymentService{
 
                 return paymentUpdateResponse;
 
-            }else{
+            } else {
                 paymentUpdateResponse.setResponseMessage("Rent was not approved");
 
                 return paymentUpdateResponse;
             }
-        }else{
+        } else {
             paymentUpdateResponse.setResponseMessage("Invalid rent id");
 
             return paymentUpdateResponse;
         }
-
-    }
-
-    @Override
-    public DeleteResponse deletePayment(Long id) {
-        return null;
     }
 }
