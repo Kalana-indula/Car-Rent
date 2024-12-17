@@ -8,15 +8,11 @@ import com.demo.carrent.dto.response.DeleteResponse;
 import com.demo.carrent.dto.response.UpdateResponse;
 import com.demo.carrent.entity.Rent;
 import com.demo.carrent.service.RentService;
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.CannotLoadBeanClassException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import javax.swing.tree.ExpandVetoException;
 import java.util.List;
 
 @RestController

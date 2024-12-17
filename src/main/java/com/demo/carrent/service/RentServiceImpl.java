@@ -11,6 +11,7 @@ import com.demo.carrent.dto.response.UpdateResponse;
 import com.demo.carrent.entity.Rent;
 import com.demo.carrent.entity.User;
 import com.demo.carrent.entity.Vehicle;
+import com.demo.carrent.exception.InvalidDateFormatException;
 import com.demo.carrent.repository.RentRepository;
 import com.demo.carrent.repository.UserRepository;
 import com.demo.carrent.repository.VehicleRepository;
@@ -19,7 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -42,7 +45,10 @@ public class RentServiceImpl implements RentService{
 
     @Override
     @Transactional
-    public CreateResponse<Rent> createRent(RentDto rentDto)throws IllegalArgumentException {
+    public CreateResponse<Rent> createRent(RentDto rentDto){
+
+        //create a response object
+        CreateResponse<Rent> response=new CreateResponse<>();
 
         try{
             //check if the entered timestamps are valid
@@ -54,8 +60,8 @@ public class RentServiceImpl implements RentService{
                 throw new IllegalArgumentException("Starting or Ending dates should not be null");
             }
 
-            //create a response object
-            CreateResponse<Rent> response=new CreateResponse<>();
+            //check if the dates are valid
+            validateDateFormat(rentDto.getStartingDate(),rentDto.getEndDate());
 
             //get vehicle and user for corresponding ids
             Vehicle vehicle=vehicleRepository.findById(rentDto.getVehicleId()).orElse(null);
@@ -110,7 +116,11 @@ public class RentServiceImpl implements RentService{
                 return response;
             }
 
+        }catch (InvalidDateFormatException e){
+            response.setStatusMessage("Invalid Format");
+            throw e;
         }catch (IllegalArgumentException e){
+            response.setStatusMessage("Date fields are null");
             throw e;
         }
 
@@ -129,7 +139,7 @@ public class RentServiceImpl implements RentService{
 
     @Override
     @Transactional
-    public UpdateResponse<Rent> updateRent(Long id, RentUpdateDto rentUpdateDto)throws IllegalArgumentException {
+    public UpdateResponse<Rent> updateRent(Long id, RentUpdateDto rentUpdateDto){
 
         //create an instance of update response for rent update
         UpdateResponse<Rent> rentUpdateResponse=new UpdateResponse<>();
@@ -153,6 +163,9 @@ public class RentServiceImpl implements RentService{
                }else {
                    throw new IllegalArgumentException("Starting or Ending dates should not be null");
                }
+
+               //validate date values
+               validateDateFormat(rentUpdateDto.getStartingDate(),rentUpdateDto.getEndDate());
 
                if(newVehicle!=null){
 
@@ -182,7 +195,11 @@ public class RentServiceImpl implements RentService{
                }else{
                    rentUpdateResponse.setResponseMessage("Invalid vehicle id");
                }
-           }catch (IllegalArgumentException e){
+           }catch (InvalidDateFormatException e){
+               rentUpdateResponse.setResponseMessage("Invalid date format");
+               throw e;
+           } catch (IllegalArgumentException e){
+               rentUpdateResponse.setResponseMessage("Date values are null");
                throw e;
            }
 
@@ -247,5 +264,21 @@ public class RentServiceImpl implements RentService{
         vehicle.setIsAvailable(isAvailable);
 
         vehicleRepository.save(vehicle);
+    }
+
+    //validate date format
+    private void validateDateFormat(LocalDate startingDate,LocalDate endDate){
+        try {
+            if (startingDate != null) {
+                //checking if starting date is valid
+                LocalDate.parse(startingDate.toString());
+            }
+            if (endDate != null) {
+                //checking if end date is valid
+                LocalDate.parse(endDate.toString());
+            }
+        }catch (DateTimeParseException e){
+            throw new InvalidDateFormatException("Invalid date format.Please ensure the date is in the correct format (yyyy-MM-dd). ");
+        }
     }
 }
