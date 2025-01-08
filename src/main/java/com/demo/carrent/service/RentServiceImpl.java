@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -268,14 +269,19 @@ public class RentServiceImpl implements RentService{
 
     //validate date format
     private void validateDateFormat(LocalDate startingDate,LocalDate endDate){
+
+        //Create a formatter for the expected date format
+        DateTimeFormatter formatter=DateTimeFormatter.ofPattern("yyyy-MM-dd");
         try {
             if (startingDate != null) {
-                //checking if starting date is valid
-                LocalDate.parse(startingDate.toString());
+                //Convert the date to string
+                String startingDateString=startingDate.toString();
+                //Validate using formatter
+                LocalDate.parse(startingDateString,formatter);
             }
             if (endDate != null) {
-                //checking if end date is valid
-                LocalDate.parse(endDate.toString());
+                String endDateString=endDate.toString();
+                LocalDate.parse(endDateString,formatter);
             }
         }catch (DateTimeParseException e){
             throw new InvalidDateFormatException("Invalid date format.Please ensure the date is in the correct format (yyyy-MM-dd). ");
