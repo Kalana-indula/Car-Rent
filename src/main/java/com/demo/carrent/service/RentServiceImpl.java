@@ -79,7 +79,6 @@ public class RentServiceImpl implements RentService{
 
                         if(duration>30){
                             response.setStatusMessage("Duration is exceeding maximum renting period");
-
                             return response;
                         }
 
