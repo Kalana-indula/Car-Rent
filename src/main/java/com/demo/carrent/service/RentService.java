@@ -29,6 +29,9 @@ public interface RentService {
     //update rent status
     UpdateResponse<Rent> updateRentStatus(Long id, RentStatusDto rentStatusDto);
 
+    //complete rent
+    UpdateResponse<Rent> completeRent(Long id,RentStatusDto rentStatusDto);
+
     //delete rent
     DeleteResponse deleteRent(Long id);
 }
