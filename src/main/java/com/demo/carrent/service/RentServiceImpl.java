@@ -242,7 +242,7 @@ public class RentServiceImpl implements RentService {
         UpdateResponse<Rent> updateResponse = new UpdateResponse<>();
 
         if (existingRent != null) {
-            existingRent.setRentStatus(RentStatus.COMPLETED);
+            existingRent.setRentStatus(RentStatus.valueOf(rentStatusDto.getRentStatus().toUpperCase()));
             rentRepository.save(existingRent);
 
             updateResponse.setResponseMessage("Rent was completed");

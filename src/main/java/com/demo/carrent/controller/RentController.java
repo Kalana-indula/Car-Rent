@@ -102,6 +102,21 @@ public class RentController {
         }
     }
 
+    @PutMapping("/complete/rents/{id}")
+    public ResponseEntity<?> completeRent(@PathVariable Long id,@RequestBody RentStatusDto rentStatusDto){
+        try{
+            UpdateResponse<Rent> updateResponse=rentService.completeRent(id,rentStatusDto);
+
+            if(updateResponse.getUpdatedData()!=null){
+                return ResponseEntity.status(HttpStatus.OK).body(updateResponse.getUpdatedData());
+            }else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(updateResponse.getResponseMessage());
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/rents/{id}")
     public ResponseEntity<?> deleteRent(@PathVariable Long id){
         try {
