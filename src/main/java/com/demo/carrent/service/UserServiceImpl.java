@@ -11,16 +11,29 @@ import java.util.List;
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
+    private final EmailService emailService;
 
     //Injecting 'UserRepository' instance using constructor injection
+    //Injecting 'EmailService' instance using constructor injection
+
     @Autowired
-    public UserServiceImpl(UserRepository userRepo){
+    public UserServiceImpl(UserRepository userRepo,EmailService emailService){
         this.userRepository=userRepo;
+        this.emailService=emailService;
     }
 
     @Override
     public User createUser(User user) {
-        return userRepository.save(user);
+
+        User savedUser=userRepository.save(user);
+
+        //send an email to the user
+        emailService.sendEmail(
+                savedUser.getEmail(),
+                "Your registration successfull",
+                "Dear " + savedUser.getFirstName() + ",\n\nThank you for registering with us.\n\nBest regards,\nCar Rent Service Team"
+        );
+        return savedUser;
     }
 
     @Override
